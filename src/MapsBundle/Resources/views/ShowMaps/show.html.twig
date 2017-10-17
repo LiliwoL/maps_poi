@@ -4,8 +4,18 @@
 
 {% block body %}
 <h1>Welcome to the Maps Poi</h1>
+    <p>
+    <button id="clear" value="Clear map POI">Clear map POI</button>
+
+    <button id="load" value="Load POI from DB">Load POI from DB</button>
+
+    <button id="delete" value="Delete  all POI from DB">Delete  all POI from DB</button>
+
+    </p>
+    <p>POI saved in DB: <span id="poiSaved"></span></p>
+    <input id="pac-input" class="controls" type="text" placeholder="Search Box">
     <div id="MAPS" style="width: 600px; height: 450px; border: 1px solid black; background: gray;" class="centered-content">
-        <!-- tu będzie mapa -->
+
     </div>
 
 {% endblock %}
