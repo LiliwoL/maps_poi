@@ -60,6 +60,9 @@ class ShowMapsController extends Controller
         $em->flush();
         } else {
             $marker = $em->getRepository('MapsBundle:Marker')->find($request->request->get('id'));
+            if (!$marker){
+                return new Response('error');
+            }
             $em->remove($marker);
             $em->flush();
         }
