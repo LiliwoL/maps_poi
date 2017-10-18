@@ -2,8 +2,12 @@
 
 namespace MapsBundle\Controller;
 
+use MapsBundle\Entity\Marker;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 
 class ShowMapsController extends Controller
 {
@@ -11,6 +15,40 @@ class ShowMapsController extends Controller
      * @Route("/", name="show")
      */
     public function ShowAction()
+    {
+        return $this->render('MapsBundle:ShowMaps:show.html.twig', array(
+            // ...
+        ));
+    }
+
+
+    /**
+     * @Route("/save",  options={"expose"=true}, name="save")
+     * @Method({"POST"})
+     */
+    public function SaveAction(Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $marker = new Marker();
+
+        $marker->setName($request->request->get('name'));
+        $marker->setLat($request->request->get('lat'));
+        $marker->setLng($request->request->get('lng'));
+        $em->persist($marker);
+        $em->flush();
+        $markers = count($em->getRepository('MapsBundle:Marker')->findAll());
+
+
+        $return = json_encode(['success' => $markers]);
+        return new Response($return, 200, array('Content-Type' => 'application/json'));
+    }
+
+
+    /**
+     * @Route("/remove", options={"expose"=true}, name="remove")
+     */
+    public function RemoveAction()
     {
         return $this->render('MapsBundle:ShowMaps:show.html.twig', array(
             // ...

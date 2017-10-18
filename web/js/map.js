@@ -97,24 +97,25 @@ function remove_marker(Marker)
 
 
 //############### Save Marker Function ##############
-function save_marker(Marker, mName, mAddress, mType, replaceWin)
+function save_marker(Marker, mName, replaceWin)
 {
     //Save new marker using jQuery Ajax
-    var mLatLang = Marker.getPosition().toUrlValue(); //get marker position
-    var myData = {name : mName,  latlang : mLatLang}; //post variables
-    console.log(replaceWin);
+    var lat = Marker.position.lat().toString() ,
+        lng = Marker.position.lng().toString();
+
+    console.log(replaceWin,lat,lng,mName);
     $.ajax({
-        type: "POST",
-        url: "map_process.php",
-        data: myData,
-        success:function(data){
-            replaceWin.html(data); //replace info window with new html
+        url: Routing.generate('save'),
+        method: 'POST',
+        data: {name: mName, lat: lat, lng: lng},
+    }).done(function (result) {
+
+            replaceWin.html('<br> Marker Name:'+mName+'<br>'); //replace info window with new html
             Marker.setDraggable(false); //set marker to fixed
 
-        },
-        error:function (xhr, ajaxOptions, thrownError){
-            console.log(thrownError); //throw any errors
-        }
+    }).fail(function (xhr, status, err) {
+        console.log(err, status, xhr);
+
     });
 }
 
