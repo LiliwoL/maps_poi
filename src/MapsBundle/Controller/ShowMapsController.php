@@ -47,12 +47,22 @@ class ShowMapsController extends Controller
 
     /**
      * @Route("/remove", options={"expose"=true}, name="remove")
+     * @Method({"POST"})
      */
-    public function RemoveAction()
+    public function RemoveAction(Request $request)
     {
-        return $this->render('MapsBundle:ShowMaps:show.html.twig', array(
-            // ...
-        ));
+        $em = $this->getDoctrine()->getManager();
+        $lat=$request->request->get('lat');
+        $lng=$request->request->get('lng');
+        $marker = $em->getRepository('MapsBundle:Marker')->findOneBy(['lat' => $lat, 'lng' => $lng]);
+        $em->remove($marker);
+        $em->flush();
+
+        $markers = count($em->getRepository('MapsBundle:Marker')->findAll());
+
+        $return = json_encode(['success' => $markers]);
+        return new Response($return, 200, array('Content-Type' => 'application/json'));
     }
+
 
 }

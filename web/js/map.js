@@ -78,20 +78,25 @@ function remove_marker(Marker)
     else
     {
         //Remove saved marker from DB and map using jQuery Ajax
-        var mLatLang = Marker.getPosition().toUrlValue(); //get marker position
-        var myData = {del : 'true', latlang : mLatLang}; //post variables
+
+        var lat = Marker.position.lat().toString() ,
+            lng = Marker.position.lng().toString();
+
         $.ajax({
-            type: "POST",
-            url: "map_process.php",
-            data: myData,
-            success:function(data){
-                Marker.setMap(null);
-                alert(data);
-            },
-            error:function (xhr, ajaxOptions, thrownError){
-                alert(thrownError); //throw any errors
-            }
+            url: Routing.generate('remove'),
+            method: 'POST',
+            data: {lat: lat, lng: lng},
+        }).done(function (result) {
+
+            Marker.setMap(null);
+
+
+        }).fail(function (xhr, status, err) {
+            console.log(err, status, xhr);
+
         });
+
+
     }
 }
 
