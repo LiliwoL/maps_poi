@@ -1,6 +1,6 @@
 $(document).ready(function() {
 
-function create_marker(MapPos, MapTitle, MapDesc,  InfoOpenDefault, DragAble, Removable)
+function create_marker(MapPos, MapTitle, MapDesc,  InfoOpenDefault, DragAble, Removable, id)
 {
     //new marker
     var marker = new google.maps.Marker({
@@ -9,6 +9,7 @@ function create_marker(MapPos, MapTitle, MapDesc,  InfoOpenDefault, DragAble, Re
         draggable:DragAble,
         animation: google.maps.Animation.DROP,
         title:"Hello World!",
+        store_id: id,
 
     });
 
@@ -80,14 +81,16 @@ function remove_marker(Marker)
         //Remove saved marker from DB and map using jQuery Ajax
 
         var lat = Marker.position.lat().toString() ,
-            lng = Marker.position.lng().toString();
+            lng = Marker.position.lng().toString(),
+            id = Marker.get('store_id');
 
         $.ajax({
             url: Routing.generate('remove'),
             method: 'POST',
-            data: {lat: lat, lng: lng},
+            data: {lat: lat, lng: lng , id: id},
         }).done(function (result) {
-
+            console.log(result.success);
+            $('#poiSaved').text(result.success);
             Marker.setMap(null);
 
 
@@ -114,6 +117,8 @@ function save_marker(Marker, mName, replaceWin)
         method: 'POST',
         data: {name: mName, lat: lat, lng: lng},
     }).done(function (result) {
+        console.log(result.success);
+        $('#poiSaved').text(result.success);
 
             replaceWin.html('<br> Marker Name:'+mName+'<br>'); //replace info window with new html
             Marker.setDraggable(false); //set marker to fixed
@@ -125,7 +130,7 @@ function save_marker(Marker, mName, replaceWin)
 }
 
 
-    var mapCenter = new google.maps.LatLng(47.6145, -122.3418); //Google map Coordinates
+    var mapCenter = new google.maps.LatLng(51.2345, 22.5518); //Google map Coordinates
     var map;
 
     map_initialize(); // initialize google map
@@ -136,7 +141,7 @@ function save_marker(Marker, mName, replaceWin)
         var googleMapOptions =
             {
                 center: mapCenter, // map center
-                zoom: 17, //zoom level, 0 = earth view to higher value
+                zoom: 10, //zoom level, 0 = earth view to higher value
                 panControl: true, //enable pan Control
                 zoomControl: true, //enable zoom control
                 zoomControlOptions: {
@@ -148,30 +153,46 @@ function save_marker(Marker, mName, replaceWin)
 
         map = new google.maps.Map(document.getElementById("MAPS"), googleMapOptions);
 
-        //Load Markers from the XML File, Check (map_process.php)
-        $.get("map_process.php", function (data) {
-            $(data).find("marker").each(function () {
-                //Get user input values for the marker from the form
-                var name      = $(this).attr('name');
 
-                var point     = new google.maps.LatLng(parseFloat($(this).attr('lat')),parseFloat($(this).attr('lng')));
+        $.ajax({
+            url: Routing.generate('all'),
+            method: 'GET',
+            dataType: 'json'
+            // data: form.serialize()
+
+
+        }).done(function (result) {
+
+            for (var i = 0; i < result.length; i++) {
+                $('#poiSaved').text(result.length);
+                console.log( result[i]);
+
+                var name      = result[i].name;
+                var point     = new google.maps.LatLng(parseFloat(result[i].lat),parseFloat(result[i].lng));
 
                 //call create_marker() function for xml loaded maker
-                create_marker(point, name,  address, false, false, false);
-            });
+                create_marker(point, name, '', false, false, false ,result[i].id);
+
+            }
+
+
+
+        }).fail(function (xhr, status, err) {
+            console.log(err);
         });
+
 
         //drop a new marker on right click
         google.maps.event.addListener(map, 'rightclick', function(event) {
             //Edit form to be displayed with new marker
             var EditForm = '<p><div class="marker-edit">'+
-                '<form action="ajax-save.php" method="POST" name="SaveMarker" id="SaveMarker">'+
+                '<form action="" method="POST" name="SaveMarker" id="SaveMarker">'+
                 '<label for="pName"><span>Place Name :</span><input type="text" name="pName" class="save-name" placeholder="Enter Title" maxlength="40" /></label>'+
                  '</form>'+
                 '</div></p><button name="save-marker" class="save-marker">Save Marker Details</button>';
 
             //call create_marker() function
-            create_marker(event.latLng, 'New Marker', EditForm, true, true, true);
+            create_marker(event.latLng, 'New Marker', EditForm, true, true, true,'');
         });
 
 

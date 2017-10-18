@@ -55,14 +55,39 @@ class ShowMapsController extends Controller
         $lat=$request->request->get('lat');
         $lng=$request->request->get('lng');
         $marker = $em->getRepository('MapsBundle:Marker')->findOneBy(['lat' => $lat, 'lng' => $lng]);
+        if ($marker) {
         $em->remove($marker);
         $em->flush();
-
+        } else {
+            $marker = $em->getRepository('MapsBundle:Marker')->find($request->request->get('id'));
+            $em->remove($marker);
+            $em->flush();
+        }
         $markers = count($em->getRepository('MapsBundle:Marker')->findAll());
-
         $return = json_encode(['success' => $markers]);
         return new Response($return, 200, array('Content-Type' => 'application/json'));
     }
+
+
+
+    /**
+     * @Route("/all", options={"expose"=true}, name="all")
+     * @Method({"GET"})
+     */
+    public function AllAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+        $markers = $em->getRepository('MapsBundle:Marker')->findAll();
+
+        $jsonMarkers = [];
+        foreach ($markers as $mark) {
+            $jsonMarkers[] = ['id' => $mark->getId() , 'name' => $mark->getName() , 'lat' => $mark->getLat() , 'lng' => $mark->getLng() ];
+        }
+
+        $return = json_encode($jsonMarkers);
+        return new Response($return, 200, array('Content-Type' => 'application/json'));
+    }
+
 
 
 }
