@@ -97,7 +97,10 @@ document.addEventListener("DOMContentLoaded", function () {
     function placeMarker(position, map) {
         var marker = new google.maps.Marker({
             position: position,
-            map: map
+            map: map,
+            animation: google.maps.Animation.DROP,
+            title:"Hello World!",
+
         });
         //map.panTo(position);
         markers.push(marker);
